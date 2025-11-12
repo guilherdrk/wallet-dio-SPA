@@ -3,12 +3,26 @@ import logo from '../assets/logo.png'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import { useForm } from 'react-hook-form'
+import z from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod"
+import ErrorInput from '../components/errorInput'
 
 
 export default function Signin(){
 
-    const { register, handleSubmit } = useForm();
+    const signinSchema = z.object({
+        email: z
+        .string()
+        .email('Invalid e-mail format')
+        .nonempty('E-mail is required'),
+        password: z.string().min(6, "A senha precisa ter no minimo 6 caracteres")
+    });
 
+    const { register, handleSubmit, formState: {errors}} = useForm({
+       resolver: zodResolver(signinSchema)
+    });
+
+    
     function handleSubmitForm(data){
         console.log(data);
     }
@@ -19,7 +33,9 @@ export default function Signin(){
             <img src={logo} alt="" className='w-44' />
             <form onSubmit={handleSubmit(handleSubmitForm)} className="flex flex-col justify-center gap-4 w-full text-2xl">
                 <Input type="email" placeholder="Email..." register={register} name="email"/>
+                {errors.email && <ErrorInput text={errors.email.message}/>}
                 <Input type="password" placeholder="Password..." register={register} name="password"/>
+                {errors.password && <ErrorInput text={errors.password.message}/>}
                 <Button type="submit" text="SIGNIN" />
             </form>
             <p className='text-white text-2xl'>
